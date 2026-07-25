@@ -1,6 +1,7 @@
 package org.kamal.taskmanager.controllers;
 
 
+import jakarta.validation.Valid;
 import org.kamal.taskmanager.dto.request.LoginRequest;
 import org.kamal.taskmanager.dto.response.LoginResponse;
 import org.kamal.taskmanager.models.User;
@@ -24,7 +25,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public LoginResponse login(@RequestBody LoginRequest request) {
+    public LoginResponse login(@Valid @RequestBody LoginRequest request) {
         User user = userService.login(request.getEmail(), request.getPassword());
         String token = jwtService.generateToken(user.getEmail());
         return new LoginResponse(token);

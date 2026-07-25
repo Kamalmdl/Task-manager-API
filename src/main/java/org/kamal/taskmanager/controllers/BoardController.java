@@ -1,5 +1,6 @@
 package org.kamal.taskmanager.controllers;
 
+import jakarta.validation.Valid;
 import org.kamal.taskmanager.dto.request.InviteMemberRequest;
 import org.kamal.taskmanager.dto.response.BoardMembershipResponse;
 import org.kamal.taskmanager.dto.response.BoardResponse;
@@ -27,7 +28,7 @@ public class BoardController {
     }
 
     @PostMapping
-    public BoardResponse createBoard(@RequestBody CreateBoardRequest request, @AuthenticationPrincipal UserDetailsImpl principal) {
+    public BoardResponse createBoard(@Valid @RequestBody CreateBoardRequest request, @AuthenticationPrincipal UserDetailsImpl principal) {
         User creator = principal.getUser();
         Board board = boardService.createBoard(request.getName(), request.getDescription(), creator);
         return BoardResponse.fromEntity(board);
@@ -40,7 +41,7 @@ public class BoardController {
     }
 
     @PostMapping("/{id}/invite")
-    public BoardMembershipResponse inviteMember(@PathVariable Long id, @RequestBody InviteMemberRequest request
+    public BoardMembershipResponse inviteMember(@PathVariable Long id, @Valid @RequestBody InviteMemberRequest request
                                                 , @AuthenticationPrincipal UserDetailsImpl principal) {
         Board board = boardService.getBoardById(id);
         User user = userService.getUserById(request.getUserId());

@@ -1,6 +1,7 @@
 package org.kamal.taskmanager.controllers;
 
 
+import jakarta.validation.Valid;
 import org.kamal.taskmanager.dto.request.RegisterRequest;
 import org.kamal.taskmanager.dto.response.UserResponse;
 import org.kamal.taskmanager.models.User;
@@ -18,7 +19,7 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public UserResponse register(@RequestBody RegisterRequest request) {
+    public UserResponse register(@Valid @RequestBody RegisterRequest request) {
         User user = userService.registerUser(request.getName(), request.getEmail(), request.getPassword());
         return new UserResponse(user.getId(), user.getName(), user.getEmail());
     }
