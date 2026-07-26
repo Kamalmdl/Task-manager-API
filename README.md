@@ -17,13 +17,42 @@ Users can create boards, invite members with roles (**ADMIN** / **MEMBER**), cre
 
 ## Core Domain Model
 
-```
-User               (id, name, email [unique], password [hashed])
-Board              (id, name, description, owner -> User)
-BoardMembership    (id, user -> User, board -> Board, role: ADMIN | MEMBER)
-                   unique constraint on (user, board)
-Task               (id, name, description, status, board -> Board,
-                    creator -> BoardMembership, assignee -> BoardMembership [nullable])
+```mermaid
+erDiagram
+  USER ||--o{ BOARD : owns
+  USER ||--o{ BOARD_MEMBERSHIP : has
+  BOARD ||--o{ BOARD_MEMBERSHIP : has
+  BOARD ||--o{ TASK : contains
+  BOARD_MEMBERSHIP ||--o{ TASK : creates
+  BOARD_MEMBERSHIP |o--o{ TASK : "assigned to"
+
+  USER {
+    bigint id PK
+    string name
+    string email UK
+    string password
+  }
+  BOARD {
+    bigint id PK
+    string name
+    string description
+    bigint owner_id FK
+  }
+  BOARD_MEMBERSHIP {
+    bigint id PK
+    bigint user_id FK
+    bigint board_id FK
+    enum role
+  }
+  TASK {
+    bigint id PK
+    string name
+    string description
+    enum status
+    bigint board_id FK
+    bigint creator_id FK
+    bigint assignee_id FK
+  }
 ```
 
 **Key design decisions:**
@@ -37,9 +66,9 @@ Task               (id, name, description, status, board -> Board,
 - A custom `OncePerRequestFilter` validates the token on every request and populates Spring Security's `SecurityContext`.
 - The currently authenticated user is resolved via `@AuthenticationPrincipal` in controllers — client-supplied user IDs are never trusted for identity.
 - Authorization is enforced in the service layer based on board membership:
-    - Only board **ADMIN**s can invite new members or assign tasks to a member.
-    - A task's status can be changed by the board **ADMIN** or the task's **assignee**.
-    - Login errors are intentionally generic ("Invalid credentials") for both "user not found" and "wrong password" to avoid user-enumeration attacks.
+  - Only board **ADMIN**s can invite new members or assign tasks to a member.
+  - A task's status can be changed by the board **ADMIN** or the task's **assignee**.
+  - Login errors are intentionally generic ("Invalid credentials") for both "user not found" and "wrong password" to avoid user-enumeration attacks.
 
 ## API Endpoints
 
