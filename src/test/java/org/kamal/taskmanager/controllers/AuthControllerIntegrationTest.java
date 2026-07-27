@@ -103,5 +103,4 @@ class AuthControllerIntegrationTest {
                 .andExpect(jsonPath("$.name").value("My Board"))
                 .andExpect(jsonPath("$.description").value("Test board"));
     }
-
 }
