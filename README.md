@@ -11,8 +11,11 @@ Users can create boards, invite members with roles (**ADMIN** / **MEMBER**), cre
 - **Hibernate / JPA** — ORM, schema auto-generated from entities
 - **MySQL** — relational database
 - **Spring Security + JWT** (`jjwt`) — stateless authentication
+- **Bean Validation** (`spring-boot-starter-validation`) — request DTO validation
+- **springdoc-openapi** — interactive Swagger UI documentation
 - **Lombok** — boilerplate reduction in DTOs
 - **JUnit 5 + Mockito** — unit testing with mocked dependencies
+- **MockMvc + H2** — integration testing against an in-memory database
 - **Maven** — build tool
 
 ## Core Domain Model
@@ -66,9 +69,9 @@ erDiagram
 - A custom `OncePerRequestFilter` validates the token on every request and populates Spring Security's `SecurityContext`.
 - The currently authenticated user is resolved via `@AuthenticationPrincipal` in controllers — client-supplied user IDs are never trusted for identity.
 - Authorization is enforced in the service layer based on board membership:
-  - Only board **ADMIN**s can invite new members or assign tasks to a member.
-  - A task's status can be changed by the board **ADMIN** or the task's **assignee**.
-  - Login errors are intentionally generic ("Invalid credentials") for both "user not found" and "wrong password" to avoid user-enumeration attacks.
+    - Only board **ADMIN**s can invite new members or assign tasks to a member.
+    - A task's status can be changed by the board **ADMIN** or the task's **assignee**.
+    - Login errors are intentionally generic ("Invalid credentials") for both "user not found" and "wrong password" to avoid user-enumeration attacks.
 
 ## API Endpoints
 
@@ -83,9 +86,9 @@ erDiagram
 | POST | `/api/tasks` | Yes | Create a task on a board |
 | PUT | `/api/tasks/{taskId}/assign?assigneeId=` | Yes (ADMIN) | Assign a task to a board member |
 | PUT | `/api/tasks/{taskId}/status?status=` | Yes (ADMIN or assignee) | Change task status |
-| GET | `/api/tasks?boardId=&status=` | Yes | List tasks for a board, optionally filtered by status |
+| GET | `/api/tasks?boardId=&status=&page=&size=&sort=` | Yes | Paginated list of tasks for a board, optionally filtered by status |
 
-Error responses follow a consistent JSON shape:
+Error responses follow a consistent JSON shape (including request validation failures, e.g. missing/invalid fields):
 ```json
 {
   "status": 403,
@@ -125,6 +128,12 @@ Error responses follow a consistent JSON shape:
 
    The API will be available at `http://localhost:8080`.
 
+5. Interactive API docs (Swagger UI) are available at:
+   ```
+   http://localhost:8080/swagger-ui/index.html
+   ```
+   Use the **Authorize** button to paste a JWT (obtained from `/api/auth/login`) and try out protected endpoints directly from the browser.
+
 ## Example Flow (via curl / Postman)
 
 ```bash
@@ -148,7 +157,8 @@ curl -X POST http://localhost:8080/api/boards \
 
 ## Testing
 
-Unit tests (JUnit 5 + Mockito) cover the service layer's business rules and authorization logic — e.g. registration validation, password hashing, board-membership checks, and task status/assignment permission rules.
+- **Unit tests** (JUnit 5 + Mockito) cover the service layer's business rules and authorization logic — e.g. registration validation, password hashing, board-membership checks, and task status/assignment permission rules. Dependencies are mocked, so no database is involved.
+- **Integration tests** (`MockMvc` + an in-memory H2 database) exercise full request → controller → service → repository → database flows — e.g. registration validation end-to-end, and a full register → login → create-board scenario authenticated with a real JWT.
 
 ```bash
 mvn test
@@ -156,10 +166,10 @@ mvn test
 
 ## Possible Next Steps
 
-- Request validation (`@Valid` / Bean Validation) on DTOs
-- Pagination for task/board listings
-- OpenAPI/Swagger documentation
-- Integration tests via `MockMvc` covering full request → response flows
+- Additional unit test coverage for `BoardService`/`TaskService` creation flows
+- Dockerize the app + MySQL via `docker-compose` for one-command setup
+- CI pipeline (GitHub Actions) running `mvn test` on every push
+- Deploy a live instance (Render/Railway) for a working demo link
 
 ## Project Structure
 
