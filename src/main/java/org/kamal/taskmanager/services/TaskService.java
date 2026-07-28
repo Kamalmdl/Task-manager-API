@@ -5,6 +5,8 @@ import org.kamal.taskmanager.exceptions.ResourceNotFoundException;
 import org.kamal.taskmanager.models.*;
 import org.kamal.taskmanager.repository.BoardMembershipRepository;
 import org.kamal.taskmanager.repository.TaskRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -61,11 +63,11 @@ public class TaskService {
         return taskRepository.save(task);
     }
 
-    public List<Task> getTasksByBoard(Board board) {
-        return taskRepository.findByBoard(board);
+    public Page<Task> getTasksByBoard(Board board, Pageable pageable) {
+        return taskRepository.findByBoard(board, pageable);
     }
 
-    public List<Task> getTasksByBoardAndStatus(Board board, TaskStatus status) {
-        return  taskRepository.findByBoardAndStatus(board, status);
+    public Page<Task> getTasksByBoardAndStatus(Board board, TaskStatus status, Pageable pageable) {
+        return  taskRepository.findByBoardAndStatus(board, status, pageable);
     }
 }

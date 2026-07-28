@@ -10,6 +10,8 @@ import org.kamal.taskmanager.security.UserDetailsImpl;
 import org.kamal.taskmanager.services.BoardService;
 import org.kamal.taskmanager.services.TaskService;
 import org.kamal.taskmanager.services.UserService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -51,9 +53,9 @@ public class TaskController {
     }
 
     @GetMapping
-    public List<TaskResponse> getTasksByBoard(@RequestParam Long boardId, @RequestParam(required = false) TaskStatus status) {
+    public Page<TaskResponse> getTasksByBoard(@RequestParam Long boardId, @RequestParam(required = false) TaskStatus status, Pageable pageable) {
         Board board = boardService.getBoardById(boardId);
-        List<Task> task = (status == null) ? taskService.getTasksByBoard(board) : taskService.getTasksByBoardAndStatus(board, status);
-        return task.stream().map(TaskResponse::fromEntity).toList();
+        Page<Task> task = (status == null) ? taskService.getTasksByBoard(board, pageable) : taskService.getTasksByBoardAndStatus(board, status, pageable);
+        return task.map(TaskResponse::fromEntity);
     }
 }
