@@ -3,6 +3,8 @@ package org.kamal.taskmanager.security;
 import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -11,7 +13,16 @@ import java.util.Date;
 @Service
 public class JwtService {
 
-    private final SecretKey secretKey = Keys.secretKeyFor(io.jsonwebtoken.SignatureAlgorithm.HS256);
+    @Value("${jwt.secret}")
+    private String secretKeyString;
+
+    private SecretKey secretKey = Keys.secretKeyFor(io.jsonwebtoken.SignatureAlgorithm.HS256);
+
+    @PostConstruct
+    public void init() {
+        this.secretKey = Keys.hmacShaKeyFor(secretKeyString.getBytes());
+    }
+
     private final long expirationMs = 1000 * 60 * 60;
 
     public String generateToken(String email) {
