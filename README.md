@@ -1,5 +1,8 @@
 # Task Manager API (Trello-lite)
 
+**🔗 Live demo:** [https://task-manager-api-y2kq.onrender.com](https://task-manager-api-y2kq.onrender.com)
+> Hosted on Render's free tier — the service spins down after 15 minutes of inactivity, so the first request after a period of idleness may take 10–30 seconds (cold start) while it wakes back up.
+
 A backend REST API for a lightweight project/task management tool — think Trello, simplified. Built as a portfolio project to practice a full Spring Boot backend stack: JPA/Hibernate, layered architecture, JWT authentication, and role-based authorization.
 
 Users can create boards, invite members with roles (**ADMIN** / **MEMBER**), create tasks, assign them to board members, and track progress through statuses.
@@ -16,6 +19,8 @@ Users can create boards, invite members with roles (**ADMIN** / **MEMBER**), cre
 - **Lombok** — boilerplate reduction in DTOs
 - **JUnit 5 + Mockito** — unit testing with mocked dependencies
 - **MockMvc + H2** — integration testing against an in-memory database
+- **Docker** — multi-stage build for a lean production image
+- **Deployed on Render** (Docker web service) + **Aiven** (managed MySQL)
 - **Maven** — build tool
 
 ## Core Domain Model
@@ -136,6 +141,8 @@ Error responses follow a consistent JSON shape (including request validation fai
 
 ## Example Flow (via curl / Postman)
 
+Replace `http://localhost:8080` below with the [live demo URL](https://task-manager-api-y2kq.onrender.com) to try it against the deployed instance instead of a local one.
+
 ```bash
 # 1. Register
 curl -X POST http://localhost:8080/api/users/register \
@@ -164,12 +171,19 @@ curl -X POST http://localhost:8080/api/boards \
 mvn test
 ```
 
+## Deployment
+
+The app is containerized with a multi-stage `Dockerfile` (Maven build stage → lean `eclipse-temurin:17-jre` runtime stage) and deployed as a Docker web service on **Render**, backed by a free managed MySQL instance on **Aiven**.
+
+Configuration is environment-specific via **Spring Profiles**:
+- `application.properties` — local development defaults
+- `application-prod.properties` — production values, all sourced from environment variables (`DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`) rather than hardcoded — no secrets are ever committed to the repository
+
 ## Possible Next Steps
 
 - Additional unit test coverage for `BoardService`/`TaskService` creation flows
-- Dockerize the app + MySQL via `docker-compose` for one-command setup
 - CI pipeline (GitHub Actions) running `mvn test` on every push
-- Deploy a live instance (Render/Railway) for a working demo link
+- `docker-compose` for one-command local setup (app + MySQL)
 
 ## Project Structure
 
