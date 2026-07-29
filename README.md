@@ -1,5 +1,7 @@
 # Task Manager API (Trello-lite)
 
+![CI](https://github.com/Kamalmdl/Task-manager-API/actions/workflows/ci.yml/badge.svg)
+
 **🔗 Live demo:** [https://task-manager-api-y2kq.onrender.com](https://task-manager-api-y2kq.onrender.com)
 > Hosted on Render's free tier — the service spins down after 15 minutes of inactivity, so the first request after a period of idleness may take 10–30 seconds (cold start) while it wakes back up.
 
